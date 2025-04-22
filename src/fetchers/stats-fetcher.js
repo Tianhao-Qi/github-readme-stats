@@ -223,6 +223,7 @@ const fetchStats = async (
   username,
   include_all_commits = false,
   exclude_repo = [],
+  include_repos = [],
   include_merged_pull_requests = false,
   include_discussions = false,
   include_discussions_answers = false,
@@ -313,6 +314,28 @@ const fetchStats = async (
     .reduce((prev, curr) => {
       return prev + curr.stargazers.totalCount;
     }, 0);
+
+  for (const fullName of include_repos) {
+    const [owner, repo] = fullName.split("/");
+    if (!owner || !repo) continue;
+    try {
+      const resp = await axios.get(
+        `https://api.github.com/repos/${owner}/${repo}`,
+        {
+          headers: {
+            Accept: "application/vnd.github.v3+json",
+            // 如需更高 rate limit，可设置 GH_TOKEN 环境变量
+            Authorization: process.env.GH_TOKEN
+              ? `token ${process.env.GH_TOKEN}`
+              : undefined,
+          },
+        }
+      );
+      stats.totalStars += resp.data.stargazers_count || 0;
+    } catch (e) {
+      logger.warn(`Unable to fetch stars for ${fullName}: ${e.message}`);
+    }
+  }
 
   stats.rank = calculateRank({
     all_commits: include_all_commits,
