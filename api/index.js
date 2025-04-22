@@ -30,6 +30,7 @@ export default async (req, res) => {
     theme,
     cache_seconds,
     exclude_repo,
+    include_repos,
     custom_title,
     locale,
     disable_animations,
@@ -71,6 +72,7 @@ export default async (req, res) => {
       username,
       parseBoolean(include_all_commits),
       parseArray(exclude_repo),
+      parseArray(include_repos),
       showStats.includes("prs_merged") ||
         showStats.includes("prs_merged_percentage"),
       showStats.includes("discussions_started"),
